@@ -1,0 +1,3 @@
+This is a mirror of http://www.vim.org/scripts/script.php?script_id=3583
+
+Ever wanted to hide comments in program and toggle between the visibility ? Vim conceal feature (vim --version | grep +conceal) provides support for this. This plugin makes use of it to hide comments based on the filetype. 
