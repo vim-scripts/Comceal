@@ -14,7 +14,7 @@
 " 3. g:comceal_default -- The comment string to assume if the file type is not
 "                       recognised by vim
 " 4. g:comceal_disabled -- To disable this plugin :(
-
+		" Test
 if exists("g:comceal_disabled") && g:comceal_disabled == 1
   finish
 endif
@@ -24,7 +24,7 @@ if exists("g:comceal_version")
 endif
 
 " Version number
-let g:comceal_version = "0.0.1"
+let g:comceal_version = "0.0.2"
 if !has('conceal') || !has('folding') || &cp
     echoerr "Either conceal or folding feature is missing: check vim --version output"
     finish
@@ -37,7 +37,12 @@ endif
 if !exists("g:comceal_list")
 	let g:comceal_list = [0,1,3]
 endif
- 
+
+"  Check if comment is a multiline (C-style) or single line (python etc)
+fun! s:singleComment()
+    return (stridx(&commentstring,'%s') == strlen(&commentstring) - 2)
+endfun
+
 
 fun! s:matchComment()
     if empty(&ft) && exists("g:comceal_default")
@@ -45,13 +50,13 @@ fun! s:matchComment()
     else
         let l:commentstr = &commentstring
     endif
+    let l:pattern = s:singleComment() ? '.*' : '\\\_.\\{-\}'
     let s:counter = index(g:comceal_list,&conceallevel)
-    let l:commentstr = escape(l:commentstr,'"*')
-    let s:commentString = "^\s*" . substitute(l:commentstr,"%s",".*","")
+    let l:commentstr = substitute(escape(l:commentstr,'"*/'),'\s*','','g')
+    let s:commentString = '^\s*' . substitute(l:commentstr,'%s',l:pattern,'')
     exe 'syntax match matchComment "' . s:commentString .'" conceal cchar='.g:comceal_char
     hi! link matchComment Comment
 endfun 
-
 
 fun! s:toggle(counter)
     if empty(a:counter)
@@ -60,6 +65,7 @@ fun! s:toggle(counter)
         let s:counter = a:counter
     endif
     exe 'setlocal conceallevel ='.g:comceal_list[s:counter] 
+    echo s:commentString
 endfun  
 
 augroup ComcealVimEnter
